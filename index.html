@@ -1,0 +1,490 @@
+﻿<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AI Workspace</title>
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#10a37f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AI Workspace">
+  <link rel="apple-touch-icon" href="/icon.svg">
+  <link rel="icon" type="image/svg+xml" href="/icon.svg">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Highlight.js for code syntax highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" id="hljs-theme">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  
+  <!-- Marked.js for Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <!-- KaTeX for Math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="app-nav-switcher">
+        <button class="nav-tab-btn active" id="tab-nav-chat" data-view="view-chat">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span>AI Чат</span>
+        </button>
+        <button class="nav-tab-btn" id="tab-nav-studio" data-view="view-studio">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+          <span>Арт-Студия</span>
+          <span class="badge-new">FLUX</span>
+        </button>
+      </div>
+
+      <!-- Chat History Section -->
+      <div class="sidebar-chat-section" id="sidebar-chat-section">
+        <div class="sidebar-header">
+          <button class="btn-new-chat" id="btn-new-chat">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Новый диалог</span>
+          </button>
+        </div>
+        <div class="chat-history-list" id="chat-list"></div>
+      </div>
+
+      <!-- Studio Quick History -->
+      <div class="sidebar-studio-section hidden" id="sidebar-studio-section">
+        <div class="sidebar-section-title">История работ</div>
+        <div class="studio-history-mini-grid" id="studio-mini-history"></div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="status-badge" id="current-mode-badge" title="Настройки ИИ">
+          <span class="status-dot"></span>
+          <span class="status-text" id="status-mode-label">Локально: qwen2.5:1.5b</span>
+        </div>
+        
+        <div class="sidebar-bottom-actions">
+          <button class="footer-btn" id="btn-open-settings" title="Настройки">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span>Настройки</span>
+          </button>
+          
+          <button class="footer-btn" id="btn-theme-toggle" title="Переключить тему">
+            <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN VIEW CONTAINER -->
+    <main class="chat-main">
+      
+      <!-- ================= 1. CHAT VIEW ================= -->
+      <div class="view-panel" id="view-chat">
+        <header class="top-header">
+          <button class="btn-icon" id="btn-open-sidebar" title="Открыть меню">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div class="chat-title-header" id="current-chat-title">Новый диалог</div>
+          <div class="header-right-actions">
+            <button class="btn-icon" id="btn-clear-chat" title="Очистить сообщения">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <div class="messages-container" id="messages-container">
+          <div class="welcome-screen" id="welcome-screen">
+            <div class="welcome-logo">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10A10 10 0 0 1 2 12 10 10 0 0 1 12 2z"></path>
+                <path d="M12 8v8"></path>
+                <path d="M8 12h8"></path>
+              </svg>
+            </div>
+            <h1>Чем я могу помочь сегодня?</h1>
+            <p class="welcome-subtitle">Персональный ИИ-ассистент с поддержкой локальных и облачных нейросетей</p>
+
+            <div class="prompt-cards-grid">
+              <div class="prompt-card" data-prompt="Объясни квантовую физику простыми словами и с примерами из жизни">
+                <div class="card-icon">💡</div>
+                <div class="card-title">Объясни тему</div>
+                <div class="card-desc">Квантовая физика простыми словами</div>
+              </div>
+              <div class="prompt-card" data-prompt="Напиши красивый скрипт на Python для анализа данных или парсинга сайта">
+                <div class="card-icon">⚡</div>
+                <div class="card-title">Напиши код</div>
+                <div class="card-desc">Полезный скрипт на Python</div>
+              </div>
+              <div class="prompt-card" data-prompt="Составь структурированный 7-дневный план для изучения английского языка">
+                <div class="card-icon">📋</div>
+                <div class="card-title">Составь план</div>
+                <div class="card-desc">Изучение языка за 7 дней</div>
+              </div>
+              <div class="prompt-card" data-prompt="Помоги придумать 5 креативных идей для нового проекта или стартапа">
+                <div class="card-icon">🚀</div>
+                <div class="card-title">Генерация идей</div>
+                <div class="card-desc">5 идей для стартапа</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-messages" id="chat-messages"></div>
+        </div>
+
+        <div class="input-section">
+          <div class="input-wrapper">
+            <textarea 
+              id="prompt-input" 
+              placeholder="Спросите о чём угодно (Shift+Enter для новой строки)..." 
+              rows="1"
+              autofocus></textarea>
+
+            <div class="input-actions">
+              <button class="btn-stop-stream hidden" id="btn-stop-stream" title="Остановить генерацию">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                </svg>
+                <span>Стоп</span>
+              </button>
+              <button class="btn-send" id="btn-send" title="Отправить сообщение (Enter)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="input-footer-note">
+            ИИ может допускать неточности. Проверяйте важную информацию.
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 2. ART STUDIO VIEW ================= -->
+      <div class="view-panel hidden" id="view-studio">
+        <div class="studio-container">
+          <div class="studio-header">
+            <div class="studio-header-title">
+              <h2>🎨 AI Арт-Студия (FLUX.1 HD)</h2>
+              <p>Создавайте иллюстрации, концепт-арты, 3D-графику и аниме 100% бесплатно</p>
+            </div>
+          </div>
+
+          <div class="studio-layout-grid">
+            <!-- Left: Controls -->
+            <div class="studio-controls-card">
+              <div class="control-group">
+                <label for="image-prompt">Описание изображения (можно писать на русском):</label>
+                <textarea 
+                  id="image-prompt" 
+                  rows="3" 
+                  placeholder="Например: средневековый замок на скале у бушующего океана, закат, кинематографичный свет..."></textarea>
+                
+                <div class="prompt-quick-tags">
+                  <span class="tag-pill" data-insert="уютная кофейня в снегопад, пар из чашки кофе, теплый свет фонаря">☕ Зимнее кафе</span>
+                  <span class="tag-pill" data-insert="неоновый спорткар на мокром асфальте в Токио, киберпанк, отражения в лужах">🏎️ Спорткар</span>
+                  <span class="tag-pill" data-insert="милый маленький дракончик спит на старинной книге, волшебное свечение">🐉 Дракончик</span>
+                  <span class="tag-pill" data-insert="космонавт парит в открытом космосе на фоне далекой галактики">🌌 Космос</span>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label>Художественный стиль:</label>
+                <div class="style-selector-grid">
+                  <button class="style-chip active" data-style="photorealism">
+                    <span class="style-emoji">📸</span>
+                    <span class="style-name">Фотореализм</span>
+                  </button>
+                  <button class="style-chip" data-style="cinematic">
+                    <span class="style-emoji">🎬</span>
+                    <span class="style-name">Кинокадр</span>
+                  </button>
+                  <button class="style-chip" data-style="cyberpunk">
+                    <span class="style-emoji">🤖</span>
+                    <span class="style-name">Киберпанк</span>
+                  </button>
+                  <button class="style-chip" data-style="anime">
+                    <span class="style-emoji">🌸</span>
+                    <span class="style-name">Аниме</span>
+                  </button>
+                  <button class="style-chip" data-style="3d-render">
+                    <span class="style-emoji">🧊</span>
+                    <span class="style-name">3D Pixar</span>
+                  </button>
+                  <button class="style-chip" data-style="fantasy">
+                    <span class="style-emoji">🏰</span>
+                    <span class="style-name">Фэнтези</span>
+                  </button>
+                  <button class="style-chip" data-style="digital-art">
+                    <span class="style-emoji">🎨</span>
+                    <span class="style-name">Цифровой арт</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="control-row">
+                <div class="control-group half">
+                  <label>Формат:</label>
+                  <div class="ratio-buttons">
+                    <button class="ratio-btn active" data-ratio="1:1" title="1024x1024 (Квадрат)">
+                      <span>🔲 1:1</span>
+                    </button>
+                    <button class="ratio-btn" data-ratio="16:9" title="1280x720 (Обои)">
+                      <span>🖥️ 16:9</span>
+                    </button>
+                    <button class="ratio-btn" data-ratio="9:16" title="720x1280 (Телефон / Shorts)">
+                      <span>📱 9:16</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="control-group half">
+                  <label for="image-model-select">Модель:</label>
+                  <select id="image-model-select">
+                    <option value="flux-realism" selected>FLUX Realism (Основная)</option>
+                    <option value="flux">FLUX.1 (Универсальная)</option>
+                    <option value="turbo">Turbo (Сверхбыстрая)</option>
+                  </select>
+                </div>
+              </div>
+
+              <button class="btn-generate-art" id="btn-generate-art">
+                <span>🚀</span>
+                <span>Сгенерировать шедевр</span>
+              </button>
+            </div>
+
+            <!-- Right: Preview Area -->
+            <div class="studio-preview-card">
+              <div class="preview-stage" id="preview-stage">
+                <div class="preview-empty-state" id="preview-empty">
+                  <div class="empty-art-icon">🖼️</div>
+                  <h3>Здесь появится ваш арт</h3>
+                  <p>Введите описание слева и нажмите кнопку генерации</p>
+                </div>
+
+                <div class="preview-loading hidden" id="preview-loading">
+                  <div class="studio-spinner"></div>
+                  <h3 id="loading-status-text">ИИ создает ваш шедевр...</h3>
+                  <p>Это займет всего 3–5 секунд</p>
+                </div>
+
+                <div class="preview-result hidden" id="preview-result">
+                  <img id="result-image-src" src="" alt="Результат">
+                  <div class="result-actions-overlay">
+                    <a id="btn-download-art" class="btn-result-action" download="art.jpg" target="_blank">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                      </svg>
+                      <span>Скачать HD</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom: Gallery Section -->
+          <div class="studio-gallery-container">
+            <div class="gallery-header-row">
+              <h3>🖼️ Галерея созданных работ</h3>
+              <span class="gallery-count" id="gallery-items-count">0 работ</span>
+            </div>
+            <div class="gallery-cards-grid" id="gallery-grid"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal-overlay hidden" id="settings-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Настройки приложения</h2>
+        <button class="btn-icon" id="btn-close-settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-tabs">
+        <button class="tab-btn active" data-tab="tab-provider">🤖 Нейросеть</button>
+        <button class="tab-btn" data-tab="tab-mobile">📱 Вход с телефона</button>
+        <button class="tab-btn" data-tab="tab-prompts">🧠 Промпт</button>
+        <button class="tab-btn" data-tab="tab-about">ℹ️ О программе</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="tab-content active" id="tab-provider">
+          <div class="form-group">
+            <label>Основной режим работы:</label>
+            <div class="mode-toggle-group">
+              <label class="mode-card">
+                <input type="radio" name="app-mode" value="ollama" checked>
+                <div class="mode-card-content">
+                  <div class="mode-icon">💻</div>
+                  <div class="mode-title">Локальный офлайн (Ollama)</div>
+                  <div class="mode-subtitle">Работает на вашем ПК без интернета, без блокировок и без ключей</div>
+                </div>
+              </label>
+
+              <label class="mode-card">
+                <input type="radio" name="app-mode" value="gemini">
+                <div class="mode-card-content">
+                  <div class="mode-icon">🌐</div>
+                  <div class="mode-title">Бесплатное Облако (Google Gemini)</div>
+                  <div class="mode-subtitle">Быстрое облако (требует VPN для получения ключа)</div>
+                </div>
+              </label>
+
+              <label class="mode-card">
+                <input type="radio" name="app-mode" value="groq">
+                <div class="mode-card-content">
+                  <div class="mode-icon">⚡</div>
+                  <div class="mode-title">Groq Cloud (Llama 3.3)</div>
+                  <div class="mode-subtitle">Сверхбыстрый облачный API</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="provider-subsettings" id="subsettings-ollama">
+            <div class="ollama-status-box" id="ollama-status-box">
+              <div class="status-indicator-row">
+                <span class="status-dot-large online" id="ollama-dot"></span>
+                <span id="ollama-status-msg">✅ Ollama активна и готова!</span>
+                <button class="btn-small" id="btn-check-ollama">Обновить</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="ollama-model-input">Локальная модель:</label>
+              <input type="text" id="ollama-model-input" value="qwen2.5:1.5b">
+              <p class="field-hint">
+                Установлены на вашем ПК: <code>qwen2.5:1.5b</code>, <code>llama3.2:1b</code>, <code>llama3.2:3b</code>.
+              </p>
+            </div>
+          </div>
+
+          <div class="provider-subsettings hidden" id="subsettings-gemini">
+            <div class="form-group">
+              <label for="gemini-api-key">Google Gemini API Key:</label>
+              <input type="password" id="gemini-api-key" placeholder="Вставьте ваш API-ключ Gemini">
+            </div>
+            <div class="form-group">
+              <label for="gemini-model-select">Модель:</label>
+              <select id="gemini-model-select">
+                <option value="gemini-2.5-flash" selected>Gemini 2.5 Flash</option>
+                <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="provider-subsettings hidden" id="subsettings-groq">
+            <div class="form-group">
+              <label for="groq-api-key">Groq API Key:</label>
+              <input type="password" id="groq-api-key" placeholder="gsk_...">
+            </div>
+            <div class="form-group">
+              <label for="groq-model-select">Модель Groq:</label>
+              <select id="groq-model-select">
+                <option value="llama-3.3-70b-versatile" selected>Llama 3.3 70B</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile connection tab -->
+        <div class="tab-content hidden" id="tab-mobile">
+          <div class="mobile-connect-box">
+            <h3>📱 Как открыть и скачать на iPhone / Android</h3>
+            <p>1. Убедитесь, что телефон и ноутбук подключены к <strong>одному Wi-Fi</strong>.</p>
+            <p>2. Откройте на телефоне в браузере (Safari на iPhone или Chrome на Android) адрес:</p>
+            <div class="ip-url-display" id="mobile-url-display">http://192.168.42.57:3000</div>
+            
+            <div class="mobile-instructions">
+              <h4>📲 Как установить как иконку приложения:</h4>
+              <ul>
+                <li><strong>На iPhone:</strong> Внизу в Safari нажмите значок <em>«Поделиться»</em> (квадрат со стрелкой вверх) ➔ выберите <strong>«На экран "Домой"»</strong>.</li>
+                <li><strong>На Android:</strong> В меню Chrome (три точки) выберите <strong>«Установить приложение»</strong> или <strong>«Добавить на главный экран»</strong>.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content hidden" id="tab-prompts">
+          <div class="form-group">
+            <label for="system-prompt-input">Инструкция для ИИ (Системный промпт):</label>
+            <textarea id="system-prompt-input" rows="6">Ты — умный, вежливый и полезный ИИ-помощник. Ты даешь точные, структурированные ответы, оформляешь код с подсветкой и пишешь на чистом русском языке.</textarea>
+          </div>
+        </div>
+
+        <div class="tab-content hidden" id="tab-about">
+          <div class="about-info">
+            <h3>AI Workspace v2.0</h3>
+            <p>Универсальный инструмент искусственного интеллекта:</p>
+            <ul>
+              <li><strong>Чат:</strong> Локальный ИИ на процессоре + Облачные режимы.</li>
+              <li><strong>Арт-Студия:</strong> FLUX генерация изображений в HD качестве.</li>
+              <li><strong>PWA:</strong> Поддержка работы на смартфонах.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btn-cancel-settings">Отмена</button>
+        <button class="btn-primary" id="btn-save-settings">Сохранить настройки</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
