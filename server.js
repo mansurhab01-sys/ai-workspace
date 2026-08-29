@@ -10,22 +10,16 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json({ limit: '20mb' }));
 
-// Serve static files from current directory, parent directory, and public subfolder
+// Serve static files
 app.use(express.static(__dirname));
-app.use(express.static(path.join(__dirname, '..')));
-if (fs.existsSync(path.join(__dirname, 'public'))) app.use(express.static(path.join(__dirname, 'public')));
-if (fs.existsSync(path.join(__dirname, '..', 'public'))) app.use(express.static(path.join(__dirname, '..', 'public')));
+if (fs.existsSync(path.join(__dirname, 'public'))) {
+  app.use(express.static(path.join(__dirname, 'public')));
+}
 
-// Root route fallback
+// Fallback for root
 app.get('/', (req, res) => {
-  const possiblePaths = [
-    path.join(__dirname, 'index.html'),
-    path.join(__dirname, '..', 'index.html'),
-    path.join(__dirname, 'public', 'index.html')
-  ];
-  for (const p of possiblePaths) {
-    if (fs.existsSync(p)) return res.sendFile(p);
-  }
+  const p = path.join(__dirname, 'index.html');
+  if (fs.existsSync(p)) return res.sendFile(p);
   res.send('AI Workspace Server Active!');
 });
 
@@ -121,18 +115,41 @@ app.post('/api/generate-image', async (req, res) => {
 app.get('/api/gallery', (req, res) => res.json([]));
 app.get('/api/ollama/status', (req, res) => res.json({ running: false, models: [] }));
 
+// Unified Streaming Chat Endpoint with Free Cloud AI
 app.post('/api/chat/stream', async (req, res) => {
+  let { messages = [] } = req.body;
   res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
   res.setHeader('Cache-Control', 'no-cache, no-transform');
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders?.();
 
-  const msg = '👋 Привет! Ваш персональный ИИ успешно запущен в облаке и работает 24/7. Вкладка Арт-Студия (генерация изображений) работает 100% бесплатно прямо сейчас!';
-  res.write('data: ' + JSON.stringify({ chunk: msg }) + '\n\n');
-  res.write('data: ' + JSON.stringify({ done: true, fullText: msg }) + '\n\n');
+  const userQuery = messages.length > 0 ? messages[messages.length - 1].content : 'Привет';
+
+  try {
+    // Free AI Text Endpoint (Pollinations/OpenAI API)
+    const promptUrl = `https://text.pollinations.ai/${encodeURIComponent(userQuery)}?system=${encodeURIComponent('Ты — умный и полезный ИИ. Отвечай подробно, структурированно и на русском языке.')}&model=openai`;
+    const aiResp = await fetch(promptUrl);
+    if (aiResp.ok) {
+      const text = await aiResp.text();
+      // Stream chunks
+      const words = text.split(' ');
+      for (let i = 0; i < words.length; i += 3) {
+        const chunk = words.slice(i, i + 3).join(' ') + ' ';
+        res.write('data: ' + JSON.stringify({ chunk }) + '\n\n');
+        await new Promise(r => setTimeout(r, 25));
+      }
+      res.write('data: ' + JSON.stringify({ done: true }) + '\n\n');
+      return res.end();
+    }
+  } catch (e) {}
+
+  // Fallback answer
+  const fallback = `Ответ на ваш вопрос "${userQuery}":\n\nЯ ваш персональный ИИ-ассистент, работающий в облаке 24/7! Задавайте любые вопросы по коду, планам или текстам, а также создавайте арты во вкладке «Арт-Студия».`;
+  res.write('data: ' + JSON.stringify({ chunk: fallback }) + '\n\n');
+  res.write('data: ' + JSON.stringify({ done: true }) + '\n\n');
   res.end();
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 AI Workspace is ready on port ${PORT}`);
+  console.log(`🚀 AI Workspace cloud server is active on port ${PORT}`);
 });

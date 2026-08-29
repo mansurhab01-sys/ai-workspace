@@ -964,3 +964,22 @@ async function fetchNetworkInfo() {
 document.getElementById('btn-open-sidebar')?.addEventListener('click', () => {
   elements.sidebar.classList.toggle('open');
 });
+// Mobile Bottom Bar Navigation Wiring
+document.getElementById('mob-tab-chat')?.addEventListener('click', () => {
+  switchView('view-chat');
+  document.getElementById('mob-tab-chat').classList.add('active');
+  document.getElementById('mob-tab-studio').classList.remove('active');
+});
+
+document.getElementById('mob-tab-studio')?.addEventListener('click', () => {
+  switchView('view-studio');
+  document.getElementById('mob-tab-studio').classList.add('active');
+  document.getElementById('mob-tab-chat').classList.remove('active');
+});
+
+document.getElementById('mob-tab-settings')?.addEventListener('click', () => {
+  openSettingsModal();
+});
+
+document.getElementById('btn-theme-dark-opt')?.addEventListener('click', () => applyTheme('dark'));
+document.getElementById('btn-theme-light-opt')?.addEventListener('click', () => applyTheme('light'));

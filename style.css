@@ -1090,3 +1090,90 @@ body {
     display: flex !important;
   }
 }
+/* MOBILE BOTTOM NAVIGATION */
+.mobile-bottom-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: var(--bg-sidebar);
+  border-top: 1px solid var(--border-color);
+  z-index: 1000;
+  justify-content: space-around;
+  align-items: center;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.mobile-nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 6px 16px;
+  border-radius: var(--radius-md);
+  transition: all 0.2s;
+}
+
+.mobile-nav-btn.active {
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  body, html {
+    height: 100dvh;
+    min-height: -webkit-fill-available;
+    overflow: hidden;
+  }
+
+  .sidebar {
+    display: none !important;
+  }
+
+  .mobile-bottom-bar {
+    display: flex;
+  }
+
+  .chat-main {
+    height: calc(100dvh - 60px);
+    width: 100vw;
+  }
+
+  .view-panel {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .studio-layout-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding-bottom: 20px;
+  }
+
+  .studio-container {
+    padding: 14px 12px 30px;
+  }
+
+  .input-section {
+    padding: 10px 12px 14px;
+  }
+
+  #prompt-input, #image-prompt {
+    font-size: 16px !important; /* Prevents auto-zoom on iPhone */
+  }
+
+  .prompt-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
